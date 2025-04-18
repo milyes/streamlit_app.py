@@ -8,7 +8,6 @@
 ## Description
 
 **TOCH OCR PDF** est une application web développée avec Flask qui permet :
-
 - d’uploader un fichier PDF,
 - d’extraire le texte automatiquement via **OCR** (PyMuPDF + Tesseract),
 - d’afficher le résultat dans une interface web,
@@ -19,19 +18,22 @@
 ## Installation
 
 ```bash
-git clone https://github.com/milyes/toch_ocr_pdf.git
+git clone https://github.com/ton_utilisateur/toch_ocr_pdf.git
 cd toch_ocr_pdf
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 python app.py
-
-
-5. En bas, clique sur **"Commit new file"**
+```
 
 ---
 
-Et voilà, ton README apparaîtra automatiquement en page d’accueil du dépôt.
+## Accès
 
-Tu veux aussi un logo NetSecurePro ou un visuel OCR animé pour l’interface GitHub ?
+Une fois lancé : http://127.0.0.1:5000
 
+---
+
+## Auteur
+
+Développé par Mohammed Ilyes Zoubirou – Projet TOCH / NetSecurePro
