@@ -25,3 +25,13 @@ python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 python app.py
+
+
+5. En bas, clique sur **"Commit new file"**
+
+---
+
+Et voilà, ton README apparaîtra automatiquement en page d’accueil du dépôt.
+
+Tu veux aussi un logo NetSecurePro ou un visuel OCR animé pour l’interface GitHub ?
+
