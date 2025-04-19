@@ -3,10 +3,10 @@ import pytesseract
 from PIL import Image
 import io
 import streamlit as st
+from fpdf import FPDF
 
 st.set_page_config(page_title="TOCH OCR PDF", layout="wide")
-
-st.title("TOCH OCR PDF â€“ DÃ©mo complÃ¨te")
+st.title("TOCH OCR PDF â€“ DÃ©mo complÃ¨te avec export PDF")
 
 uploaded_file = st.file_uploader("SÃ©lectionnez un fichier PDF", type="pdf")
 
@@ -22,6 +22,18 @@ def extract_text_from_pdf(file):
         text_output.append(text)
     return "\n\n".join(text_output)
 
+def generate_pdf(text):
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_auto_page_break(auto=True, margin=15)
+    pdf.set_font("Arial", size=12)
+    for line in text.splitlines():
+        pdf.multi_cell(0, 10, line)
+    output = io.BytesIO()
+    pdf.output(output)
+    output.seek(0)
+    return output
+
 if uploaded_file:
     st.info("Analyse OCR en cours...")
     extracted_text = extract_text_from_pdf(uploaded_file)
@@ -30,3 +42,6 @@ if uploaded_file:
     st.text_area("RÃ©sultat OCR", extracted_text, height=400)
 
     st.download_button("TÃ©lÃ©charger le texte en .txt", extracted_text, file_name="ocr_result.txt")
+
+    pdf_data = generate_pdf(extracted_text)
+    st.download_button("TÃ©lÃ©charger en PDF", pdf_data, file_name="ocr_result.pdf")
