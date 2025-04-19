@@ -1,51 +1,32 @@
-from flask import Flask, render_template, request, Response
-import os
-from utils.ocr_engine import extract_text_from_pdf
-from fpdf import FPDF
+import fitz  # PyMuPDF
+import pytesseract
+from PIL import Image
+import io
+import streamlit as st
 
-app = Flask(__name__)
-UPLOAD_FOLDER = 'uploads'
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+st.set_page_config(page_title="TOCH OCR PDF", layout="wide")
 
-@app.route('/', methods=['GET'])
-def index():
-    return render_template('index.html')
+st.title("TOCH OCR PDF â€“ DÃ©mo complÃ¨te")
 
-@app.route('/upload', methods=['POST'])
-def upload_pdf():
-    if 'pdf_file' not in request.files:
-        return "Aucun fichier reçu", 400
-    file = request.files['pdf_file']
-    if file.filename == '':
-        return "Fichier vide", 400
-    filepath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
-    file.save(filepath)
-    text = extract_text_from_pdf(filepath)
-    return render_template('result.html', extracted_text=text)
+uploaded_file = st.file_uploader("SÃ©lectionnez un fichier PDF", type="pdf")
 
-@app.route('/export', methods=['POST'])
-def export_txt():
-    text = request.form.get('text_content', '')
-    return Response(
-        text,
-        mimetype='text/plain',
-        headers={'Content-Disposition': 'attachment;filename=extrait_ocr.txt'}
-    )
+def extract_text_from_pdf(file):
+    text_output = []
+    pdf_doc = fitz.open(stream=file.read(), filetype="pdf")
+    for page_num in range(len(pdf_doc)):
+        page = pdf_doc.load_page(page_num)
+        pix = page.get_pixmap()
+        img_data = pix.tobytes("png")
+        image = Image.open(io.BytesIO(img_data))
+        text = pytesseract.image_to_string(image)
+        text_output.append(text)
+    return "\n\n".join(text_output)
 
-@app.route('/export_pdf', methods=['POST'])
-def export_pdf():
-    text = request.form.get('text_content', '')
-    pdf = FPDF()
-    pdf.add_page()
-    pdf.set_auto_page_break(auto=True, margin=15)
-    pdf.set_font("Arial", size=12)
-    for line in text.splitlines():
-        pdf.multi_cell(0, 10, line)
-    return Response(
-        pdf.output(dest='S').encode('latin-1'),
-        mimetype='application/pdf',
-        headers={'Content-Disposition': 'attachment;filename=extrait_ocr.pdf'}
-    )
+if uploaded_file:
+    st.info("Analyse OCR en cours...")
+    extracted_text = extract_text_from_pdf(uploaded_file)
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    st.subheader("Texte extrait :")
+    st.text_area("RÃ©sultat OCR", extracted_text, height=400)
+
+    st.download_button("TÃ©lÃ©charger le texte en .txt", extracted_text, file_name="ocr_result.txt")
